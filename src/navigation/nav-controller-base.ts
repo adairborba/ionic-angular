@@ -737,6 +737,25 @@ export class NavControllerBase extends Ion implements NavController {
       }
 
       this._cleanup(enteringView);
+
+      /**
+       * On iOS 12.2 there is a bug that
+       * causes scrolling to not
+       * be re-enabled unless there
+       * is some kind of CSS reflow triggered
+       */
+      if (enteringView && enteringView.getIONContentRef()) {
+          var platform_1 = this.plt;
+          platform_1.timeout(function () {
+              platform_1.raf(function () {
+                  var content = enteringView.getIONContentRef().nativeElement;
+                  content.style.zIndex = '1';
+                  platform_1.raf(function () {
+                      content.style.zIndex = '';
+                  });
+              });
+          }, 500);
+      }
     } else {
       // If transition does not complete, we have to cleanup anyway, because
       // previous pages in the stack are not hidden probably.
